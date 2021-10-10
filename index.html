@@ -90,33 +90,15 @@
 					}
 				}
 				
-				window.addEventListener('online',  updateOnlineStatus);
-				window.addEventListener('offline', updateOnlineStatus);
 			}
 			
 			function start_puzzle(type) {
 				if (type == 0){
 					if (zapusk > 0){
-						console.log(online);
-						if(online == 'online'){
-							img_src = 'url("https://picsum.photos/' + razmer + '/' + razmer + '/?random")';
-							$('.part_puzzl').css('background-image', img_src);
-							$('.part_img').css('background-image', img_src);
-						}
-						else{
-							new Toast({
-								title: false,
-								text: 'Нет интернет соединения, игра перезапущена в оффлайн режиме!',
-								theme: 'left',
-								autohide: true,
-								interval: 10000
-							});
-							
-							var i = Math.floor(Math.random() * 7);
-							$('.part_puzzl').css('background-image', pazzle_img[i]);
-							$('.part_img').css('background-image', pazzle_img[i]);
-						}
-					}					
+						img_src = 'url("https://picsum.photos/' + razmer + '/' + razmer + '/?random")';
+						$('.part_puzzl').css('background-image', img_src);
+						$('.part_img').css('background-image', img_src);
+					}
 				}
 				else{
 					var i = Math.floor(Math.random() * 7);
