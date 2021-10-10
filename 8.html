@@ -1,0 +1,208 @@
+<html>
+	<head>
+		<title>Пазлы</title>
+		<link rel="stylesheet" type="text/css" href="style/style.css">
+		<link rel="stylesheet" type="text/css" href="style/toast.min.css">
+		
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="js/toast.min.js"></script>
+		<script type="text/javascript" src="js/offline.js"></script>
+		
+	</head>
+	<body onload="init_puzz();" class='pole'>
+		<center>
+			<h1>Игра пазлы!</h1>
+		</center>
+			
+		<div id="puzzle"></div>
+		<div id="origin_img"></div>
+		
+		<a onclick='start_puzzle(0);' id='but_start' class='butt_online'>Запустить</a>
+		<a onclick='start_puzzle(1);' id='but_start' class='butt_offline'>Перезапустить оффлайн</a>
+
+        <div class="overlay" id="overlay" style="display:none;"></div>
+        <div class="box" id="box">
+            <a class="boxclose" id="boxclose"></a>
+            <h1>Поздравляю пазл собран!</h1>
+        </div>
+		
+		<script>
+			let puzzle = document.getElementById('puzzle');
+			let origin_img = document.getElementById('origin_img');
+			let zapusk = 0;
+			let razmer = 400;
+			let pazzle_img = [
+				"url('style/img/offline_img/1.jpg')",
+				"url('style/img/offline_img/2.jpg')",
+				"url('style/img/offline_img/3.jpg')",
+				"url('style/img/offline_img/4.jpg')",
+				"url('style/img/offline_img/5.jpg')",
+				"url('style/img/offline_img/6.jpg')",
+				"url('style/img/offline_img/7.jpg')"
+			];
+			
+			let part_cord = [
+				[[0, 0], [-100, 0], [-200, 0], [-300, 0], [-400, 0]],
+				[[0, -100], [-100, -100], [-200, -100], [-300, -100], [-400, -100]],
+				[[0, -200], [-100, -200], [-200, -200], [-300, -200], [-400, -200]],
+				[[0, -300], [-100, -300], [-200, -300], [-300, -300], [-400, -300]],
+				[[0, -400], [-100, -400], [-200, -400], [-300, -400], [-400, -400]]
+			];
+			
+			let puzzl_cord = [
+				[[0, 0], [100, 0], [200, 0], [300, 0], [400, 0]],
+				[[0, 100], [100, 100], [200, 100], [300, 100], [400, 100]],
+				[[0, 200], [100, 200], [200, 200], [300, 200], [400, 200]],
+				[[0, 300], [100, 300], [200, 300], [300, 300], [400, 300]],
+				[[0, 400], [100, 400], [200, 400], [300, 400], [400, 400]]
+			];
+			
+			let collected_items = 0;
+			var online = true;
+			
+			window.onload = function() {
+				for (var i = 0; i < 5; i++){
+					for (var j = 0; j < 5; j++){
+						var d_in1 = document.createElement('div');
+						d_in1.className = 'puzzl';
+						d_in1.id = 'puzzl_' + i + '_' + j;
+						d_in1.style.left = puzzl_cord[i][j][0] + 'px';
+						d_in1.style.top = puzzl_cord[i][j][1] + 'px';
+						puzzle.appendChild(d_in1);
+						
+						var d_out1 = document.createElement('div');
+						d_out1.className = 'part_puzzl';
+						d_out1.id = 'part_puzzl_' + i + '_' + j;
+						d_out1.style.backgroundPosition = part_cord[i][j][0] + 'px ' + part_cord[i][j][1] + 'px';
+						d_in1.appendChild(d_out1);
+						
+						var d_in2 = document.createElement('div');
+						d_in2.className = 'img';
+						d_in2.id = 'img_' + i + '_' + j;
+						origin_img.appendChild(d_in2);
+						
+						var d_out2 = document.createElement('div');
+						d_out2.className = 'part_img';
+						d_out2.id = 'part_img_' + i + '_' + j;
+						d_out2.style.backgroundPosition = part_cord[i][j][0] + 'px ' + part_cord[i][j][1] + 'px';
+						d_in2.appendChild(d_out2);
+					}
+				}
+				
+				window.addEventListener('online',  updateOnlineStatus);
+				window.addEventListener('offline', updateOnlineStatus);
+			}
+			
+			function start_puzzle(type) {
+				if (type == 0){
+					if (zapusk > 0){
+						console.log(online);
+						if(online == 'online'){
+							img_src = 'url("https://picsum.photos/' + razmer + '/' + razmer + '/?random")';
+							$('.part_puzzl').css('background-image', img_src);
+							$('.part_img').css('background-image', img_src);
+						}
+						else{
+							new Toast({
+								title: false,
+								text: 'Нет интернет соединения, игра перезапущена в оффлайн режиме!',
+								theme: 'left',
+								autohide: true,
+								interval: 10000
+							});
+							
+							var i = Math.floor(Math.random() * 7);
+							$('.part_puzzl').css('background-image', pazzle_img[i]);
+							$('.part_img').css('background-image', pazzle_img[i]);
+						}
+					}					
+				}
+				else{
+					var i = Math.floor(Math.random() * 7);
+					$('.part_puzzl').css('background-image', pazzle_img[i]);
+					$('.part_img').css('background-image', pazzle_img[i]);
+				}
+								
+				var z_index_elem = 1;
+				
+				$('.puzzl').css('border', '1px solid #CCCCCC');			
+				document.getElementById('but_start').textContent = 'Перезапустить онлайн';
+				$('.butt_online').css('padding', '6px');
+				
+				$('.puzzl').draggable({
+					containment: 'body',
+					scroll: false
+				}).on('mousedown', function() {
+					$(this).css('z-index', z_index_elem).children().addClass('capt').mouseup(
+						function() {$(this).removeClass('capt');}
+					);
+					z_index_elem++;
+				});
+				
+				scatter_puzzle();
+				check_puzzle();
+				zapusk++;
+				razmer++;
+			}
+			
+			function scatter_puzzle () {
+				for(var k = 0; k < 5; k++)
+					for (var i = 0; i < 5; i++)
+						for (var j = 0; j < 5; j++) {
+							var rand_x = Math.floor(Math.random() * 400);
+							var rand_y = Math.floor(Math.random() * 550)-50;
+							$('#puzzl_' + i + '_' + j).animate({top: rand_x + 'px', left: rand_y + 'px'}, 200);
+						}
+			
+				for (var i = 0; i < 5; i++)
+					for (var j = 0; j < 5; j++) {
+						var rand_x = Math.floor(Math.random() * 400);
+						var rand_y = Math.floor(Math.random() * 1100)-350;
+						while(rand_y > -100 && rand_y < 500){
+							rand_y = Math.floor(Math.random() * 1100)-350;
+						}
+						
+						$('#puzzl_' + i + '_' + j).animate({top: rand_x + 'px', left: rand_y + 'px'}, 150);
+						$('#puzzl_' + i + '_' + j).css('z-index', '2');
+					}
+			}
+			
+			function check_puzzle () {
+				for (var i = 0; i < 5; i++)
+					for (var j = 0; j < 5; j++) {
+						$('#img_' + i + '_' + j).droppable({
+						accept: '#puzzl_' + i + '_' + j,
+							drop: function(event, ui) {
+								collected_items++;
+								$(ui.helper[0]).css('top', $(this).position().top);
+								$(ui.helper[0]).css('left', $(this).position().left);
+								$(ui.helper[0]).draggable('disable').css('z-index', '1');
+								if (collected_items == 25) {
+									$('.puzzl').css('border', 'none');
+									$('.puzzl').draggable('enable').css('z-index', '1');
+									$('#overlay').fadeIn('fast',function(){
+										$('#box').animate({'top':'160px'},500);
+									});
+								}
+							}
+						})
+					}
+			}
+			
+			$(function() {			
+                $('#boxclose').click(function(){
+                    $('#box').animate({'top':'-200px'},500,function(){
+                        $('#overlay').fadeOut('fast');
+                    });
+                });
+
+            });
+			
+			
+			function updateOnlineStatus(event) {
+				online = navigator.onLine ? "online" : "offline";
+			}
+		</script>
+	</body>
+</html>
